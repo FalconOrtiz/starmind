@@ -1,0 +1,10 @@
+node_modules
+dist
+.DS_Store
+*.local
+starmind-*.png
+
+# unused earth maps (not loaded by the viewer)
+public/textures/earth/earth_blue_marble_8k.jpg
+public/textures/earth/earth_clouds_soft_16k.jpg
+public/textures/earth/earth_clouds_soft_8k.jpg
