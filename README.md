@@ -2,8 +2,6 @@
 
 Cinematic Three.js **WebGPU** viewer of SpaceX’s AI1 satellite.
 
-**Public demo:** [https://falconortiz.github.io/starmind/](https://falconortiz.github.io/starmind/)
-
 Specs locked to [spacex.com/spacexai/starmind](https://www.spacex.com/spacexai/starmind):
 
 - Deployed height **30 m / 98 ft**
