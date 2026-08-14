@@ -1,5 +1,6 @@
 import * as THREE from "three/webgpu";
 import { EARTH_RADIUS } from "../scene/earth";
+import { PinchZoom } from "../input/pinchZoom";
 
 export class FlightController {
   readonly camera: THREE.PerspectiveCamera;
@@ -20,27 +21,59 @@ export class FlightController {
   private readonly camPos = new THREE.Vector3();
   private primed = false;
   speed = 0;
+  private readonly pinch = new PinchZoom();
 
   snapNext(): void {
     this.primed = false;
+  }
+
+  isPinching(): boolean {
+    return this.pinch.pinching;
+  }
+
+  /** dir > 0 zooms in (closer). */
+  nudgeZoom(dir: number): void {
+    this.distance = THREE.MathUtils.clamp(this.distance * (dir > 0 ? 0.7 : 1.42), 18, 1600);
   }
 
   constructor(canvas: HTMLCanvasElement) {
     this.camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.15, 140000);
     window.addEventListener("keydown", (e) => this.keys.add(e.code));
     window.addEventListener("keyup", (e) => this.keys.delete(e.code));
+    window.addEventListener("blur", () => this.keys.clear());
     canvas.addEventListener("pointerdown", (e) => {
-      if (!this.enabled || e.button !== 0) return;
+      if (!this.enabled) return;
+      this.pinch.down(e.pointerId, e.clientX, e.clientY, this.distance);
+      if (this.pinch.pinching) {
+        this.dragging = false;
+        try {
+          canvas.releasePointerCapture(e.pointerId);
+        } catch {
+          /* already free */
+        }
+        return;
+      }
+      if (e.button !== 0) return;
       this.dragging = true;
       this.lastX = e.clientX;
       this.lastY = e.clientY;
-      canvas.setPointerCapture(e.pointerId);
+      if (e.pointerType !== "touch") canvas.setPointerCapture(e.pointerId);
     });
-    canvas.addEventListener("pointerup", () => {
-      this.dragging = false;
-    });
+    const endPtr = (e: PointerEvent) => {
+      this.pinch.up(e.pointerId);
+      if (this.pinch.pointers.size === 0) this.dragging = false;
+    };
+    canvas.addEventListener("pointerup", endPtr);
+    canvas.addEventListener("pointercancel", endPtr);
     canvas.addEventListener("pointermove", (e) => {
-      if (!this.enabled || !this.dragging) return;
+      if (!this.enabled) return;
+      const next = this.pinch.move(e.pointerId, e.clientX, e.clientY);
+      if (next !== null) {
+        this.distance = THREE.MathUtils.clamp(next, 18, 1600);
+        this.dragging = false;
+        return;
+      }
+      if (!this.dragging) return;
       const dx = e.clientX - this.lastX;
       const dy = e.clientY - this.lastY;
       this.lastX = e.clientX;

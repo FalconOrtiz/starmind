@@ -17,6 +17,7 @@ export interface HudApi {
   onToggleLabels: (cb: (on: boolean) => void) => void;
   onToggleVolume: (cb: (on: boolean) => void) => void;
   onFormation: (cb: (n: number) => void) => void;
+  onZoom: (cb: (dir: number) => void) => void;
 }
 
 export function mountHud(root: HTMLElement, detail: HTMLElement): HudApi {
@@ -68,6 +69,11 @@ export function mountHud(root: HTMLElement, detail: HTMLElement): HudApi {
       ).join("")}
     </div>
 
+    <div class="zoom-pad glass" id="zoom-pad">
+      <button id="btn-zoom-in" type="button" aria-label="Zoom in">+</button>
+      <button id="btn-zoom-out" type="button" aria-label="Zoom out">−</button>
+    </div>
+
     <div class="hint glass" id="hint">
       <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> fly
       · <kbd>Q</kbd><kbd>E</kbd> altitude
@@ -82,6 +88,7 @@ export function mountHud(root: HTMLElement, detail: HTMLElement): HudApi {
   let labelsCb: ((on: boolean) => void) | null = null;
   let volCb: ((on: boolean) => void) | null = null;
   let formCb: ((n: number) => void) | null = null;
+  let zoomCb: ((dir: number) => void) | null = null;
   let labelsOn = true;
   let volOn = true;
   let satCount = 1;
@@ -112,6 +119,8 @@ export function mountHud(root: HTMLElement, detail: HTMLElement): HudApi {
       satCount = Math.max(1, satCount - 1);
       formCb?.(satCount);
     }
+    if (t.id === "btn-zoom-in") zoomCb?.(1);
+    if (t.id === "btn-zoom-out") zoomCb?.(-1);
   });
 
   const formPanel = root.querySelector("#formation-panel") as HTMLElement;
@@ -149,8 +158,8 @@ export function mountHud(root: HTMLElement, detail: HTMLElement): HudApi {
       compareEl.style.display = mode === "compare" ? "flex" : "none";
       hint.innerHTML =
         mode === "flight"
-          ? `<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> fly · <kbd>Q</kbd><kbd>E</kbd> altitude · <kbd>+</kbd><kbd>−</kbd> formation · drag to look`
-          : `Same football pitch · hover to scatter · click to blast · drag to orbit`;
+          ? `<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> fly · pinch or <kbd>+</kbd><kbd>−</kbd> zoom · drag to look`
+          : `Pinch or <kbd>+</kbd><kbd>−</kbd> zoom · drag to orbit · tap to shove`;
     },
     setComparison: (id) => {
       root.querySelectorAll("[data-cmp]").forEach((b) => b.classList.toggle("active", (b as HTMLElement).dataset.cmp === id));
@@ -188,6 +197,9 @@ export function mountHud(root: HTMLElement, detail: HTMLElement): HudApi {
     },
     onFormation: (cb) => {
       formCb = cb;
+    },
+    onZoom: (cb) => {
+      zoomCb = cb;
     },
   };
 }

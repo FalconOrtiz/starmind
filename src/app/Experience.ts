@@ -127,33 +127,50 @@ export class Experience {
 
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
+    const viewDir = new THREE.Vector3();
+
+    const ndcFromEvent = (e: PointerEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      return rect;
+    };
+
+    const pokeFromEvent = (e: PointerEvent, impulse: number) => {
+      if (this.mode !== "compare" || !park.activeKind()) return 0;
+      if (this.compare.isPinching()) return 0;
+      const rect = ndcFromEvent(e);
+      raycaster.setFromCamera(pointer, this.flight.camera);
+      viewDir.copy(raycaster.ray.direction);
+      const screenHits = park.pokeScreen(
+        this.flight.camera,
+        pointer.x,
+        pointer.y,
+        rect.width,
+        rect.height,
+        impulse,
+        viewDir
+      );
+      if (screenHits > 0) return screenHits;
+      return park.poke(raycaster.ray.origin, raycaster.ray.direction, impulse);
+    };
 
     canvas.addEventListener("pointerdown", (e) => {
       this.pointerMoved = 0;
-      if (this.mode !== "compare" || !park.activeKind()) return;
-      const rect = canvas.getBoundingClientRect();
-      pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-      raycaster.setFromCamera(pointer, this.flight.camera);
-      park.poke(raycaster.ray.origin, raycaster.ray.direction, 7);
+      pokeFromEvent(e, 7);
     });
     canvas.addEventListener("pointermove", (e) => {
       this.pointerMoved += Math.abs(e.movementX) + Math.abs(e.movementY);
-      if (this.mode !== "compare" || !park.activeKind()) return;
-      const rect = canvas.getBoundingClientRect();
-      pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-      raycaster.setFromCamera(pointer, this.flight.camera);
-      park.poke(raycaster.ray.origin, raycaster.ray.direction, 1.8);
+      if (this.compare.isPinching() || this.flight.isPinching()) return;
+      pokeFromEvent(e, 1.8);
     });
     canvas.addEventListener("pointerup", (e) => {
-      if (this.pointerMoved > 6) return;
-      const rect = canvas.getBoundingClientRect();
-      pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      if (this.pointerMoved > 10) return;
+      if (this.compare.isPinching() || this.flight.isPinching()) return;
+      ndcFromEvent(e);
       raycaster.setFromCamera(pointer, this.flight.camera);
       if (this.mode === "compare" && park.activeKind()) {
-        park.poke(raycaster.ray.origin, raycaster.ray.direction, 9);
+        pokeFromEvent(e, 9);
       }
       const hits = raycaster.intersectObject(craft.group, true);
       const id = hits[0]?.object.userData.partId as PartId | undefined;
@@ -183,6 +200,7 @@ export class Experience {
         this.flight.enabled = true;
         this.flight.snapNext();
         this.compare.disable();
+        this.flight.camera.fov = 58;
         this.flight.camera.near = 0.15;
         this.flight.camera.far = 140000;
         this.flight.camera.updateProjectionMatrix();
@@ -259,6 +277,10 @@ export class Experience {
         const need = Math.min(1400, 90 + (n - 1) * 70);
         if (this.flight.distance < need) this.flight.distance = need;
       }
+    });
+    hud.onZoom((dir) => {
+      if (this.mode === "flight") this.flight.nudgeZoom(dir);
+      else this.compare.nudgeZoom(dir);
     });
     hud.setFormation(1);
 

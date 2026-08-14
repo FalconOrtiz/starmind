@@ -46,6 +46,7 @@ export class FieldPhysics {
   private readonly _hit = new THREE.Vector3();
   private readonly _axis = new THREE.Vector3();
   private readonly _dq = new THREE.Quaternion();
+  private readonly _proj = new THREE.Vector3();
 
   addMesh(
     kind: PhysKind,
@@ -107,13 +108,12 @@ export class FieldPhysics {
     impulse: number
   ): number {
     dir.normalize();
-    let hits = 0;
     const hitList: PhysBody[] = [];
     for (const b of this.bodies) {
       if (b.kind !== kind) continue;
       this._from.set(b.x, b.y, b.z).sub(origin);
       const t = this._from.dot(dir);
-      if (t < 0 || t > 120) continue;
+      if (t < 0 || t > 480) continue;
       this._hit.copy(origin).addScaledVector(dir, t);
       const dx = b.x - this._hit.x;
       const dy = b.y - this._hit.y;
@@ -122,28 +122,32 @@ export class FieldPhysics {
       if (dx * dx + dy * dy + dz * dz > reach * reach) continue;
       hitList.push(b);
     }
+    return this.applyHits(kind, dir, hitList, impulse);
+  }
 
-    const knockUp = THREE.MathUtils.clamp(impulse * 0.22, 0.55, 2.4);
-    const knockSide = THREE.MathUtils.clamp(impulse * 0.48, 1.1, 5.2);
-
-    for (const b of hitList) {
-      const dx = b.x - this._hit.x;
-      const dz = b.z - this._hit.z;
-      b.vx += dir.x * knockSide + dx * 1.6 + (Math.random() - 0.5) * 0.8;
-      b.vy += knockUp;
-      b.vz += dir.z * knockSide + dz * 1.6 + (Math.random() - 0.5) * 0.8;
-      b.wx += (Math.random() - 0.5) * 7;
-      b.wy += (Math.random() - 0.5) * 5;
-      b.wz += (Math.random() - 0.5) * 7;
-      b.awake = true;
-      hits++;
+  pokeScreen(
+    camera: THREE.Camera,
+    ndcX: number,
+    ndcY: number,
+    kind: PhysKind,
+    pixelRadius: number,
+    viewW: number,
+    viewH: number,
+    impulse: number,
+    viewDir: THREE.Vector3
+  ): number {
+    const r2 = pixelRadius * pixelRadius;
+    const hitList: PhysBody[] = [];
+    for (const b of this.bodies) {
+      if (b.kind !== kind) continue;
+      this._proj.set(b.x, b.y, b.z).project(camera);
+      if (this._proj.z < -1 || this._proj.z > 1) continue;
+      const dx = ((this._proj.x - ndcX) * 0.5) * viewW;
+      const dy = ((this._proj.y - ndcY) * 0.5) * viewH;
+      if (dx * dx + dy * dy > r2) continue;
+      hitList.push(b);
     }
-
-    if (hitList.length) {
-      this.wakeNeighbors(kind, hitList);
-      this.wakeStack(kind, hitList);
-    }
-    return hits;
+    return this.applyHits(kind, viewDir, hitList, impulse);
   }
 
   update(dt: number, kind: PhysKind | null): void {
@@ -215,6 +219,24 @@ export class FieldPhysics {
 
     this.resolveCollisions(kind);
     this.syncVisuals(kind);
+  }
+
+  private applyHits(kind: PhysKind, dir: THREE.Vector3, hitList: PhysBody[], impulse: number): number {
+    if (!hitList.length) return 0;
+    const knockUp = THREE.MathUtils.clamp(impulse * 0.22, 0.55, 2.4);
+    const knockSide = THREE.MathUtils.clamp(impulse * 0.48, 1.1, 5.2);
+    for (const b of hitList) {
+      b.vx += dir.x * knockSide + (Math.random() - 0.5) * 0.8;
+      b.vy += knockUp;
+      b.vz += dir.z * knockSide + (Math.random() - 0.5) * 0.8;
+      b.wx += (Math.random() - 0.5) * 7;
+      b.wy += (Math.random() - 0.5) * 5;
+      b.wz += (Math.random() - 0.5) * 7;
+      b.awake = true;
+    }
+    this.wakeNeighbors(kind, hitList);
+    this.wakeStack(kind, hitList);
+    return hitList.length;
   }
 
   private wakeStack(kind: PhysKind, seeds: PhysBody[]): void {

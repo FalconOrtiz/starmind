@@ -12,6 +12,15 @@ export interface ScalePark {
   setComparison: (id: ComparisonId) => void;
   update: (dt: number) => void;
   poke: (origin: THREE.Vector3, dir: THREE.Vector3, impulse: number) => number;
+  pokeScreen: (
+    camera: THREE.Camera,
+    ndcX: number,
+    ndcY: number,
+    viewW: number,
+    viewH: number,
+    impulse: number,
+    viewDir: THREE.Vector3
+  ) => number;
   activeKind: () => "tesla" | "human" | "duck" | null;
 }
 
@@ -159,6 +168,12 @@ export function createScalePark(): ScalePark {
       if (!k) return 0;
       const radius = k === "duck" ? 2.6 : k === "human" ? 1.8 : 4.2;
       return physics.pokeRay(origin, dir, k, radius, impulse);
+    },
+    pokeScreen: (camera, ndcX, ndcY, viewW, viewH, impulse, viewDir) => {
+      const k = kindOf(active);
+      if (!k) return 0;
+      const px = k === "tesla" ? 64 : k === "human" ? 52 : 44;
+      return physics.pokeScreen(camera, ndcX, ndcY, k, px, viewW, viewH, impulse, viewDir);
     },
     activeKind: () => kindOf(active),
   };
