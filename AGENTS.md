@@ -15,7 +15,7 @@ npm ci
 npm run dev
 ```
 
-Dev server: **http://localhost:5174**
+Dev server: **http://localhost:8080** (set `PORT` to override).
 
 ```bash
 npm run build    # static files in dist/
@@ -86,7 +86,7 @@ Unused maps listed in `.gitignore` stay unused.
 
 ## Publish (grok.me / any static host)
 
-This is a static Vite SPA. After `npm run build`, host the `dist/` folder. GitHub Pages uses `BASE_PATH=/starmind/` (see `.github/workflows/pages.yml`).
+This is a static Vite SPA. After `npm run build`, host the `dist/` folder. GitHub Pages uses `BASE_PATH=/starmind/` (see `.github/workflows/pages.yml`). Vercel / grok.me uses `vercel.json` (`outputDirectory: dist`).
 
 For Grok Build Mode / grok.me:
 

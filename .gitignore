@@ -4,6 +4,10 @@ dist
 *.local
 starmind-*.png
 .preview-*.png
+screenshots
+artifacts
+.env
+.env.*
 
 # unused earth maps (not loaded by the viewer)
 public/textures/earth/earth_blue_marble_8k.jpg

@@ -31,12 +31,19 @@ npm ci
 npm run dev
 ```
 
-Opens http://localhost:5174
+Opens http://localhost:8080
 
 ```bash
 npm run build
 npm run preview
 ```
+
+## Publish
+
+Static Vite SPA — no env files, no backend.
+
+- **grok.me / Vercel:** `npm run build` then host `dist/` (`vercel.json` is included).
+- **GitHub Pages:** workflow in `.github/workflows/pages.yml` (`BASE_PATH=/starmind/`).
 
 ## Controls
 
