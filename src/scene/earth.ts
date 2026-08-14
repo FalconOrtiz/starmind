@@ -63,21 +63,38 @@ function prepareColorMap(t: THREE.Texture): THREE.Texture {
   return t;
 }
 
+const TEXTURE_REMOTES = [
+  "https://cdn.jsdelivr.net/gh/FalconOrtiz/starmind@main/public",
+  "https://raw.githubusercontent.com/FalconOrtiz/starmind/main/public",
+] as const;
+
 function assetUrl(path: string): string {
   if (!path.startsWith("/")) return path;
   return `${import.meta.env.BASE_URL}${path.slice(1)}`;
 }
 
-async function loadMap(url: string): Promise<THREE.Texture | null> {
+function loadOnce(href: string): Promise<THREE.Texture | null> {
   return new Promise((resolve) => {
     const loader = new THREE.TextureLoader();
+    loader.setCrossOrigin("anonymous");
     loader.load(
-      assetUrl(url),
+      href,
       (t) => resolve(prepareColorMap(t)),
       undefined,
       () => resolve(null)
     );
   });
+}
+
+async function loadMap(url: string): Promise<THREE.Texture | null> {
+  const local = await loadOnce(assetUrl(url));
+  if (local) return local;
+  if (!url.startsWith("/textures/")) return null;
+  for (const root of TEXTURE_REMOTES) {
+    const remote = await loadOnce(`${root}${url}`);
+    if (remote) return remote;
+  }
+  return null;
 }
 
 function createGlobeMaterial(
