@@ -262,14 +262,6 @@ export class Experience {
       this.post?.setSize(w, h);
       labels.setSize(w, h);
     };
-    hud.onToggleLabels((on) => {
-      dims.setVisible(on && this.mode === "compare");
-    });
-    let volumeOn = true;
-    hud.onToggleVolume((on) => {
-      volumeOn = on;
-      shafts.visible = on && this.mode === "flight";
-    });
     hud.onFormation((n) => {
       formation = n;
       hud.setFormation(n);
@@ -317,7 +309,7 @@ export class Experience {
         const sunBlocked =
           rayHitsEarth(this.flight.camera.position, lights.sunMesh.position) ||
           rayHitsEarth(craft.group.position, lights.sunMesh.position);
-        shafts.visible = volumeOn && !sunBlocked;
+        shafts.visible = !sunBlocked;
         if (shafts.visible) {
           (shafts.userData.align as ((o: THREE.Vector3, from: THREE.Vector3) => void) | undefined)?.(
             craft.group.position,

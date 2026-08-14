@@ -14,8 +14,6 @@ export interface HudApi {
   hideDetail: () => void;
   onMode: (cb: (mode: AppMode) => void) => void;
   onComparison: (cb: (id: ComparisonId) => void) => void;
-  onToggleLabels: (cb: (on: boolean) => void) => void;
-  onToggleVolume: (cb: (on: boolean) => void) => void;
   onFormation: (cb: (n: number) => void) => void;
   onZoom: (cb: (dir: number) => void) => void;
 }
@@ -37,14 +35,6 @@ export function mountHud(root: HTMLElement, detail: HTMLElement): HudApi {
     <div class="hud-top glass" id="mode-switch">
       <button data-mode="flight" class="active">Flight</button>
       <button data-mode="compare">Compare</button>
-    </div>
-
-    <div class="side-tools">
-      <div class="glass">
-        <div class="section">Display</div>
-        <button id="btn-labels" class="active">Labels</button>
-        <button id="btn-vol" class="active">Volumetric</button>
-      </div>
     </div>
 
     <div class="glass formation-panel" id="formation-panel">
@@ -87,12 +77,8 @@ export function mountHud(root: HTMLElement, detail: HTMLElement): HudApi {
 
   let modeCb: ((m: AppMode) => void) | null = null;
   let cmpCb: ((id: ComparisonId) => void) | null = null;
-  let labelsCb: ((on: boolean) => void) | null = null;
-  let volCb: ((on: boolean) => void) | null = null;
   let formCb: ((n: number) => void) | null = null;
   let zoomCb: ((dir: number) => void) | null = null;
-  let labelsOn = true;
-  let volOn = true;
   let satCount = 1;
 
   root.addEventListener("click", (e) => {
@@ -102,16 +88,6 @@ export function mountHud(root: HTMLElement, detail: HTMLElement): HudApi {
     }
     if (t.dataset.cmp) {
       cmpCb?.(t.dataset.cmp as ComparisonId);
-    }
-    if (t.id === "btn-labels") {
-      labelsOn = !labelsOn;
-      t.classList.toggle("active", labelsOn);
-      labelsCb?.(labelsOn);
-    }
-    if (t.id === "btn-vol") {
-      volOn = !volOn;
-      t.classList.toggle("active", volOn);
-      volCb?.(volOn);
     }
     if (t.id === "btn-sat-plus") {
       satCount = Math.min(10, satCount + 1);
@@ -190,12 +166,6 @@ export function mountHud(root: HTMLElement, detail: HTMLElement): HudApi {
     },
     onComparison: (cb) => {
       cmpCb = cb;
-    },
-    onToggleLabels: (cb) => {
-      labelsCb = cb;
-    },
-    onToggleVolume: (cb) => {
-      volCb = cb;
     },
     onFormation: (cb) => {
       formCb = cb;

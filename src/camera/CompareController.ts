@@ -105,15 +105,16 @@ export class CompareController {
   frame(id: ComparisonId): void {
     this.id = id;
     const mobile = isCoarsePointer();
-    const desktop: Record<Exclude<ComparisonId, "duck">, { pos: THREE.Vector3; target: THREE.Vector3 }> = {
-      pitch: { pos: new THREE.Vector3(46, 40, 86), target: new THREE.Vector3(0, 10, 0) },
-      tesla: { pos: new THREE.Vector3(42, 34, 78), target: new THREE.Vector3(8, 10, 10) },
-      human: { pos: new THREE.Vector3(42, 34, 78), target: new THREE.Vector3(8, 10, 10) },
-    };
-    const phone: Record<Exclude<ComparisonId, "duck">, { pos: THREE.Vector3; target: THREE.Vector3 }> = {
-      pitch: { pos: new THREE.Vector3(8, 58, 118), target: new THREE.Vector3(0, 10, 0) },
-      tesla: { pos: new THREE.Vector3(132, 42, 4), target: new THREE.Vector3(22, 14, 2) },
-      human: { pos: new THREE.Vector3(132, 42, 4), target: new THREE.Vector3(22, 14, 2) },
+    const frames: Record<Exclude<ComparisonId, "duck">, { pos: THREE.Vector3; target: THREE.Vector3 }> = {
+      pitch: mobile
+        ? { pos: new THREE.Vector3(8, 58, 118), target: new THREE.Vector3(0, 10, 0) }
+        : { pos: new THREE.Vector3(46, 40, 86), target: new THREE.Vector3(0, 10, 0) },
+      tesla: mobile
+        ? { pos: new THREE.Vector3(22, 32, 128), target: new THREE.Vector3(16, 12, 6) }
+        : { pos: new THREE.Vector3(42, 34, 78), target: new THREE.Vector3(8, 10, 10) },
+      human: mobile
+        ? { pos: new THREE.Vector3(22, 32, 128), target: new THREE.Vector3(16, 12, 6) }
+        : { pos: new THREE.Vector3(42, 34, 78), target: new THREE.Vector3(8, 10, 10) },
     };
     this.camera.fov = mobile ? 74 : 58;
     this.camera.updateProjectionMatrix();
@@ -133,7 +134,7 @@ export class CompareController {
     this.controls.maxDistance = 320;
     this.camera.near = 0.2;
     this.camera.updateProjectionMatrix();
-    const s = (mobile ? phone : desktop)[id];
+    const s = frames[id];
     this.camera.position.copy(s.pos);
     this.controls.target.copy(s.target);
     this.controls.update();

@@ -276,20 +276,9 @@ body,
   color: var(--text);
 }
 
-.side-tools {
-  position: absolute;
-  top: 22px;
-  right: 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  pointer-events: auto;
-  width: 168px;
-}
-
 .formation-panel {
   position: absolute;
-  top: 168px;
+  top: 22px;
   right: 22px;
   width: 168px;
   padding: 10px;
@@ -306,42 +295,6 @@ body,
   margin: 4px 6px 8px;
 }
 
-.side-tools .glass {
-  padding: 10px;
-  border-radius: 14px;
-}
-
-.side-tools .section {
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin: 4px 6px 8px;
-}
-
-.side-tools button {
-  width: 100%;
-  appearance: none;
-  border: 1px solid transparent;
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--muted);
-  font-family: var(--font);
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  padding: 8px 10px;
-  border-radius: 10px;
-  cursor: pointer;
-  margin-bottom: 6px;
-  text-align: left;
-}
-
-.side-tools button.active,
-.side-tools button:hover {
-  border-color: var(--border-hot);
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.08);
-}
-
 .stepper {
   display: flex;
   align-items: center;
@@ -349,12 +302,19 @@ body,
 }
 
 .stepper button {
+  appearance: none;
   width: 36px;
   margin: 0;
   text-align: center;
   font-size: 18px;
   line-height: 1;
   padding: 8px 0;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  font-family: var(--font);
+  border-radius: 10px;
+  cursor: pointer;
 }
 
 .stepper span {
@@ -519,30 +479,6 @@ body,
 @media (max-width: 900px) {
   .brand {
     display: none;
-  }
-  .side-tools {
-    top: 12px;
-    right: 12px;
-    bottom: auto;
-    left: auto;
-    width: auto;
-    flex-direction: row;
-    gap: 6px;
-  }
-  .side-tools .glass {
-    padding: 6px;
-    border-radius: 12px;
-  }
-  .side-tools .section {
-    display: none;
-  }
-  .side-tools button {
-    width: auto;
-    min-width: 44px;
-    min-height: 44px;
-    margin: 0;
-    padding: 8px 10px;
-    font-size: 11px;
   }
   .formation-panel {
     top: auto;
