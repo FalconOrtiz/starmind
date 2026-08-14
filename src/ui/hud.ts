@@ -45,13 +45,14 @@ export function mountHud(root: HTMLElement, detail: HTMLElement): HudApi {
         <button id="btn-labels" class="active">Labels</button>
         <button id="btn-vol" class="active">Volumetric</button>
       </div>
-      <div class="glass" id="formation-panel">
-        <div class="section">Formation</div>
-        <div class="stepper">
-          <button id="btn-sat-minus" type="button" aria-label="Remove satellite">−</button>
-          <span id="sat-count">1 / 10</span>
-          <button id="btn-sat-plus" type="button" aria-label="Add satellite">+</button>
-        </div>
+    </div>
+
+    <div class="glass formation-panel" id="formation-panel">
+      <div class="section">Satellites</div>
+      <div class="stepper">
+        <button id="btn-sat-minus" type="button" aria-label="Remove satellite">−</button>
+        <span id="sat-count">1 / 10</span>
+        <button id="btn-sat-plus" type="button" aria-label="Add satellite">+</button>
       </div>
     </div>
 
@@ -70,6 +71,7 @@ export function mountHud(root: HTMLElement, detail: HTMLElement): HudApi {
     </div>
 
     <div class="zoom-pad glass" id="zoom-pad">
+      <div class="section">Zoom</div>
       <button id="btn-zoom-in" type="button" aria-label="Zoom in">+</button>
       <button id="btn-zoom-out" type="button" aria-label="Zoom out">−</button>
     </div>
